@@ -33,6 +33,7 @@ contract PrizeBondSystem {
 
     function checkPrizeBond(uint _bondId) public view returns (bool) {
         require(_bondId > 0 && _bondId <= totalPrizeBonds, "Invalid bond ID");
+        require (_bondId == prizeBonds[_bondId].id, "Invalid bond ID");
         return prizeBonds[_bondId].redeemed;
     }
 
@@ -58,21 +59,21 @@ contract PrizeBondSystem {
         return prizeAmount;
     }
 
-    function distributeRemainingPrize() public {
-        require(nextPrizeIndex == prizeDistribution.length, "All prizes have not been claimed yet");
-        require(remainingPrizeFund == 0, "Remaining prize fund has already been distributed");
+    // function distributeRemainingPrize() public {
+    //     require(nextPrizeIndex == prizeDistribution.length, "All prizes have not been claimed yet");
+    //     require(remainingPrizeFund == 0, "Remaining prize fund has already been distributed");
 
-        remainingPrizeFund = totalPrizes;
-        uint numParticipants = totalPrizeBonds - nextPrizeIndex;
-        uint prizePerParticipant = remainingPrizeFund / numParticipants;
-        remainingPrizeFund = 0;
+    //     remainingPrizeFund = totalPrizes;
+    //     uint numParticipants = totalPrizeBonds - nextPrizeIndex;
+    //     uint prizePerParticipant = remainingPrizeFund / numParticipants;
+    //     remainingPrizeFund = 0;
 
-        for (uint i = nextPrizeIndex; i <= totalPrizeBonds; i++) {
-            if (!prizeBonds[i].redeemed) {
-                payable(prizeBonds[i].owner).transfer(prizePerParticipant);
-            }
-        }
-    }
+    //     for (uint i = nextPrizeIndex; i <= totalPrizeBonds; i++) {
+    //         if (!prizeBonds[i].redeemed) {
+    //             payable(prizeBonds[i].owner).transfer(prizePerParticipant);
+    //         }
+    //     }
+    // }
 
     function getTotalPrizes() public view returns (uint) {
         return totalPrizes;

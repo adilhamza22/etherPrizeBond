@@ -1,4 +1,4 @@
-const contractAddress = '0xB9A6531a4D67C171D1ff0ddBB78C74977180e986'; // actual contract address
+const contractAddress = '0xe3AC4590a723D39CbC2Bcb49B9693B8B75559b35'; // actual contract address
 const contractABI = [
   {
     "inputs": [
@@ -170,13 +170,6 @@ const contractABI = [
   },
   {
     "inputs": [],
-    "name": "distributeRemainingPrize",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [],
     "name": "getTotalPrizes",
     "outputs": [
       {
@@ -222,30 +215,45 @@ const contractABI = [
 const web3 = new Web3('http://localhost:7545'); // Connect to local Ethereum node
 const contract = new web3.eth.Contract(contractABI, contractAddress);
 
+// Function to issue a prize bond
 async function issuePrizeBond() {
-    // Issue a prize bond with value 1 Ether
-    //await contract.methods.issuePrizeBond(web3.utils.toWei('1', 'ether')).send({from: '0x9db5d5b3F122D886c762F94488662D50062BF30B'});
-    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-    console.log(accounts);
-    const fromAddress = accounts[0]; // Assuming you want to use the third account
-    console.log(fromAddress);
-    const gasLimit = 3000000; // Specify a higher gas limit
-    await contract.methods.issuePrizeBond(web3.utils.toWei('1', 'ether')).send({ from: fromAddress , gas: '5000000' });
-    console.log('Prize bond issued');
-  } 
-
-async function claimPrize(bondId) {
-    //await contract.methods.claimPrize(bondId).send({from: '0x9db5d5b3F122D886c762F94488662D50062BF30B'});
-    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-    const fromAddress = accounts[0]; // Assuming you want to use the first account
-    await contract.methods.claimPrize(bondId).send({ from: fromAddress , gas: '5000000'});
-    console.log('Prize claimed');
+  const prizeAmount = document.getElementById("prizeAmount").value;
+  await contract.methods.issuePrizeBond(prizeAmount).send({ from: web3.eth.defaultAccount , gas: 3000000});
 }
 
-async function distributeRemainingPrize() {
-    //await contract.methods.distributeRemainingPrize().send({from: '0x9db5d5b3F122D886c762F94488662D50062BF30B'});
-    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-    const fromAddress = accounts[0]; // Assuming you want to use the first account
-    await contract.methods.distributeRemainingPrize().send({ from: fromAddress , gas: '5000000'});
-    console.log('Remaining prize distributed');
+// Function to check a prize bond
+async function checkPrizeBond() {
+  const bondId = document.getElementById("bondId").value;
+  const isRedeemed = await contract.methods.checkPrizeBond(bondId).call();
+  alert(`Prize bond ${bondId} is ${isRedeemed ? "redeemed" : "not redeemed"}`);
 }
+
+// Function to claim a prize
+async function claimPrize() {
+  const bondId = document.getElementById("bondId").value;
+  await contract.methods.claimPrize(bondId).send({ from: web3.eth.defaultAccount , gas: 3000000});
+}
+
+// Function to update the UI with contract data
+async function updateUI() {
+  const totalPrizes = await contract.methods.getTotalPrizes().call();
+  document.getElementById("totalPrizes").textContent = totalPrizes;
+
+  const prizeDistribution = await contract.methods.getPrizeDistribution().call();
+  document.getElementById("prizeDistribution").textContent = JSON.stringify(prizeDistribution);
+
+  const remainingPrizeFund = await contract.methods.getRemainingPrizeFund().call();
+  document.getElementById("remainingPrizeFund").textContent = remainingPrizeFund;
+}
+
+// Load contract data when the page loads
+window.addEventListener("load", async () => {
+  // Request account access if needed
+  await window.ethereum.enable();
+
+  // Set default account
+  web3.eth.defaultAccount = (await web3.eth.getAccounts())[0];
+
+  // Update UI with contract data
+  updateUI();
+});

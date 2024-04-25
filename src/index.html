@@ -1,14 +1,36 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Prize Bond System</title>
-    <script src="https://cdn.jsdelivr.net/npm/web3@1.5.1/dist/web3.min.js"></script>
-    <script src="./script.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prize Bond System</title>
+<script src="https://cdn.jsdelivr.net/npm/web3@1.5.2/dist/web3.min.js"></script>
 </head>
 <body>
-    <h1>Prize Bond System</h1>
-    <button onclick="issuePrizeBond()">Issue Prize Bond</button>
-    <button onclick="claimPrize(1)">Claim Prize for Bond ID 1</button>
-    <button onclick="distributeRemainingPrize()">Distribute Remaining Prize</button>
+<h1>Prize Bond System</h1>
+<div>
+  <label for="prizeAmount">Prize Amount:</label>
+  <input type="number" id="prizeAmount" />
+</div>
+<button onclick="issuePrizeBond()">Issue Prize Bond</button>
+<div>
+  <label for="bondId">Bond ID:</label>
+  <input type="number" id="bondId" />
+</div>
+<button onclick="checkPrizeBond()">Check Prize Bond</button>
+<button onclick="claimPrize()">Claim Prize</button>
+<div>
+  <label for="totalPrizes">Total Prizes:</label>
+  <span id="totalPrizes"></span>
+</div>
+<div>
+  <label for="prizeDistribution">Prize Distribution:</label>
+  <span id="prizeDistribution"></span>
+</div>
+<div>
+  <label for="remainingPrizeFund">Remaining Prize Fund:</label>
+  <span id="remainingPrizeFund"></span>
+</div>
+<script src="script.js"></script>
 </body>
 </html>
