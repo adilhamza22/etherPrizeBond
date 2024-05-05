@@ -1,4 +1,6 @@
-const contractAddress = '0xe3AC4590a723D39CbC2Bcb49B9693B8B75559b35'; // actual contract address
+// const { eth } = require("web3");
+
+const contractAddress = '0x63737fAe144D2EeEEB2efaD9a30D1c63feB58Cd3'; // actual contract address
 const contractABI = [
   {
     "inputs": [
@@ -123,6 +125,40 @@ const contractABI = [
     "constant": true
   },
   {
+    "inputs": [],
+    "name": "totalWinnersSelected",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function",
+    "constant": true
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "winners",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function",
+    "constant": true
+  },
+  {
     "inputs": [
       {
         "internalType": "uint256",
@@ -169,8 +205,56 @@ const contractABI = [
     "type": "function"
   },
   {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_bondId",
+        "type": "uint256"
+      }
+    ],
+    "name": "getBondOwner",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function",
+    "constant": true
+  },
+  {
+    "inputs": [],
+    "name": "getWinners",
+    "outputs": [
+      {
+        "internalType": "address[]",
+        "name": "",
+        "type": "address[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function",
+    "constant": true
+  },
+  {
     "inputs": [],
     "name": "getTotalPrizes",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function",
+    "constant": true
+  },
+  {
+    "inputs": [],
+    "name": "getTotalPrizeBonds",
     "outputs": [
       {
         "internalType": "uint256",
@@ -218,20 +302,66 @@ const contract = new web3.eth.Contract(contractABI, contractAddress);
 // Function to issue a prize bond
 async function issuePrizeBond() {
   const prizeAmount = document.getElementById("prizeAmount").value;
-  await contract.methods.issuePrizeBond(prizeAmount).send({ from: web3.eth.defaultAccount , gas: 3000000});
+  if (prizeAmount <= 0 || prizeAmount == "" || prizeAmount ==NaN || prizeAmount == undefined){
+    alert("Enter a valid amount !") ;
+    return;
+  }
+  try {
+    await contract.methods.issuePrizeBond(prizeAmount).send({ from: web3.eth.defaultAccount , gas: 3000000 });
+    alert(`Prize Bond of value: ${prizeAmount} issued` );
+  } catch (error) {
+      alert(`Some error happened check console logs`);    
+      console.error(error);
+  } 
+
 }
 
 // Function to check a prize bond
 async function checkPrizeBond() {
   const bondId = document.getElementById("bondId").value;
-  const isRedeemed = await contract.methods.checkPrizeBond(bondId).call();
-  alert(`Prize bond ${bondId} is ${isRedeemed ? "redeemed" : "not redeemed"}`);
+  if (bondId <= 0 || bondId == "" || bondId ==NaN || bondId == undefined){
+    alert("Enter a valid bond ID !") ;
+    return;
+  }
+  try {
+    
+    const isRedeemed = await contract.methods.checkPrizeBond(bondId).call();
+    alert(`Prize bond ${bondId} is ${isRedeemed ? "redeemed" : "not redeemed"}`);
+  } catch (error) {
+    if(error.message.includes("revert")){
+      alert("Error: The transaction was reverted. This may be due to an invalid bond ID or the bond has already been claimed.");
+    }
+    else{
+      alert("Some error happened, check console logs");
+    }
+
+    console.error(error);
+  }
 }
 
 // Function to claim a prize
 async function claimPrize() {
-  const bondId = document.getElementById("bondId").value;
-  await contract.methods.claimPrize(bondId).send({ from: web3.eth.defaultAccount , gas: 3000000});
+  try {
+    const bondId = document.getElementById("bondId").value;
+    const bondOwnerAddr = await contract.methods.getBondOwner(bondId).call();
+    console.log(`Bond Owner of Current Bond with id ${bondId} is ${bondOwnerAddr}`)
+    const defaultAccAddr = await web3.eth.defaultAccount; 
+    console.log("defaultAccAddr now: ",defaultAccAddr);
+    //change this connect to default acc here rather than on window load;
+    if (bondOwnerAddr != defaultAccAddr) {
+      alert("You are not the owner of this bond");
+      return;
+    }
+    await contract.methods.claimPrize(bondId).send({ from: web3.eth.defaultAccount , gas: 3000000});
+  } catch (error) {
+    if(error.message.includes("revert")){
+      alert("Revert Happened, all Prizes might have been claimed or your details might be incorrect.")
+    }else{
+      alert("Some error happened, check console logs");
+
+    }
+    console.error(error)
+  }
 }
 
 // Function to update the UI with contract data
@@ -244,6 +374,12 @@ async function updateUI() {
 
   const remainingPrizeFund = await contract.methods.getRemainingPrizeFund().call();
   document.getElementById("remainingPrizeFund").textContent = remainingPrizeFund;
+
+  const winners = await contract.methods.getWinners().call();
+  document.getElementById("firstPlace").textContent = winners[0];
+  document.getElementById("secondPlace").textContent = winners[1];
+  document.getElementById("thirdPlace").textContent = winners[2];
+  console.log(winners)
 }
 
 // Load contract data when the page loads
@@ -253,7 +389,17 @@ window.addEventListener("load", async () => {
 
   // Set default account
   web3.eth.defaultAccount = (await web3.eth.getAccounts())[0];
+  console.log(`Default Account: ${web3.eth.defaultAccount}`)
+  
+  // Listen for account changes
+  window.ethereum.on('accountsChanged', async function (accounts) {
+    // Update default account
+    web3.eth.defaultAccount = accounts[0];
+    console.log(`Default Account changed: ${web3.eth.defaultAccount}`)
 
+    
+  });  
   // Update UI with contract data
   updateUI();
+
 });
