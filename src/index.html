@@ -19,6 +19,12 @@
 </div>
 <button onclick="checkPrizeBond()">Check Prize Bond</button>
 <button onclick="claimPrize()">Claim Prize</button>
+
+<!-- total bonds issued -->
+<div>
+  <label for="totalBondsIssued">Total Bonds Issued:</label>
+  <span id="totalBondsIssued"></span>
+</div>
 <div>
   <label for="totalPrizes">Total Prize Bonds Issued Amount Up till Now:</label>
   <span id="totalPrizes"></span>
@@ -40,12 +46,23 @@
   <div>
     <label for="firstPlace">1st Place:</label>
     <span id="firstPlace"></span>
+
+    <!-- BondId -->
+    <div>
+      <label for="firstPlaceBondId">Bond ID:</label>
+      <span id="firstPlaceBondId"></span>
+    </div>
   </div>
 
   <!-- 2nd Place -->
   <div>
     <label for="secondPlace">2nd Place:</label>
     <span id="secondPlace"></span>
+    <!-- Bond ID -->
+    <div>
+      <label for="secondPlaceBondId">Bond ID:</label>
+      <span id="secondPlaceBondId"></span>
+    </div>
   </div>
 
   <!-- 3rd Place -->
@@ -53,6 +70,15 @@
     <label for="thirdPlace">3rd Place:</label>
     <span id="thirdPlace"></span>
   </div>
+  <!-- Bond ID -->
+  <div>
+    <label for="thirdPlaceBondId">Bond ID:</label>
+    <span id="thirdPlaceBondId"></span>
+  </div>
+</div>
+<div>
+  <label for="contractBalance">Contract Balance</label>
+  <span id="contractBalance"></span>
 </div>
 
 <script src="script.js"></script>
