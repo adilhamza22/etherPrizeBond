@@ -1,7 +1,7 @@
 // const { eth } = require("web3");
 
-const contractAddress = '0x5e81Fbe6177E597759FdCF16fB2daB9F47b315d5'; // actual contract address
-const contractABI = [
+const contractAddress = '0xFa806722f6F6831C4d12EDDbe69C33BDb7A54e65'; // actual contract address
+const contractABI =[
   {
     "inputs": [
       {
@@ -433,6 +433,7 @@ const contract = new web3.eth.Contract(contractABI, contractAddress);
 // Function to issue a prize bond
 async function issuePrizeBond() {
   const prizeAmount = document.getElementById("prizeAmount").value;
+  
   if (prizeAmount <= 0 || prizeAmount == "" || prizeAmount == NaN || prizeAmount == undefined){
     alert("Enter a valid amount !") ;
     return;
@@ -484,6 +485,7 @@ async function checkPrizeBond() {
 
 // Function to claim a prize
 async function claimPrize() {
+  
   const getPrizeAmounts = await contract.methods.getPrizeAmounts().call();
   const getWinnerBondIDs = await contract.methods.getWinnerBondIDs().call();
 
@@ -520,8 +522,7 @@ async function claimPrize() {
     console.log("Index:",index);
     const TX_receipt= await contract.methods.claimPrize(bondId).send({ 
       from: web3.eth.defaultAccount,
-      gas: 3000000,
-      // value: prizeAmountInWei
+      gas: 4000000,
     });
     alert(`Prize Claimed for bond ${bondId} by account ${defaultAccAddr}`);
     console.log(`Prize Claimed for bond ${bondId} with amount ${TX_receipt}`);
@@ -541,9 +542,11 @@ async function claimPrize() {
 // Function to update the UI with contract data
 async function updateUI() {
   const contractBalance = await contract.methods.getContractBalance().call();
+  //convert to ether
+  const contractBalanceInEther = web3.utils.fromWei(contractBalance, 'ether');
   const totalPrizes = await contract.methods.getTotalPrizes().call();
   document.getElementById("totalBondsIssued").textContent = await contract.methods.getTotalPrizeBonds().call();
-  document.getElementById("contractBalance").textContent = contractBalance;
+  document.getElementById("contractBalance").textContent = contractBalanceInEther + " ETH";
 
   document.getElementById("totalPrizes").textContent = totalPrizes;
 

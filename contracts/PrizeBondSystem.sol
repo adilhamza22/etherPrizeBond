@@ -78,11 +78,27 @@ contract PrizeBondSystem {
         require (_bondId == prizeBonds[_bondId].id, "Invalid bond ID");
         return prizeBonds[_bondId].redeemed;
     }
+
     function selectWinners() private {
         require(totalWinnersSelected < 3, "Winners already selected");
-
+        uint[] memory selectedBondIds = new uint[](3);
         for (uint i = 0; i < 3; i++) {
-            uint rand = uint(keccak256(abi.encodePacked(block.timestamp, block.difficulty, i))) % totalPrizeBonds + 1;
+            // uint rand = uint(keccak256(abi.encodePacked(block.timestamp, block.difficulty, i))) % totalPrizeBonds + 1;
+            uint rand;
+            bool bondIdSelected;
+
+            do {
+                rand = uint(keccak256(abi.encodePacked(block.timestamp, block.difficulty, i))) % totalPrizeBonds + 1;
+                bondIdSelected = false;
+
+                // Check if the bond ID has already been selected
+                for (uint j = 0; j < i; j++) {
+                    if (selectedBondIds[j] == rand) {
+                        bondIdSelected = true;
+                        break;
+                    }
+                }
+            } while (bondIdSelected);
             winners[i] = prizeBonds[rand].owner;
             winnerBondIDs[winners[i]]=rand;
             winnerPrizeAmounts.push(calculatePrizeAmount());
@@ -90,6 +106,7 @@ contract PrizeBondSystem {
 
         }
     }
+    
     function claimPrize(uint _bondId) public returns(uint) {
         require(_bondId > 0 && _bondId <= totalPrizeBonds, "Invalid bond ID");
         require(prizeBonds[_bondId].owner == msg.sender, "You are not the owner of this bond");
@@ -100,9 +117,29 @@ contract PrizeBondSystem {
         uint contractBalance = address(this).balance; // Get the contract's balance
         require(prizeAmount <= contractBalance, "Not enough balance in the contract");
         totalPrizes -= prizeAmount;
-        payable(msg.sender).transfer(prizeAmount);
+        uint256 amountInWei = prizeAmount * 1 ether;
+        payable(msg.sender).transfer(amountInWei);
         return prizeAmount;
     }
+//     function claimPrize(uint _bondId) public returns (uint) {
+//     require(_bondId > 0 && _bondId <= totalPrizeBonds, "Invalid bond ID");
+//     require(prizeBonds[_bondId].owner == msg.sender, "You are not the owner of this bond");
+//     require(!prizeBonds[_bondId].redeemed, "Prize already claimed");
+
+//     prizeBonds[_bondId].redeemed = true;
+//     uint prizeAmount = winnerPrizeAmounts[nextWinnerIndex++];
+//     uint contractBalance = address(this).balance; // Get the contract's balance
+//     require(prizeAmount <= contractBalance, "Not enough balance in the contract");
+
+//     // Transfer the prize amount to the bond owner
+//     uint256 amountInWei = prizeAmount * 1 ether;
+//     (bool success, ) = payable(msg.sender).call{value: amountInWei}("");
+//     require(success, "Transfer failed");
+
+//     totalPrizes -= prizeAmount;
+//     return prizeAmount;
+// }
+
     
     function calculatePrizeAmount() private returns (uint) {
         require(nextPrizeIndex < prizeDistribution.length, "All prizes have been claimed");

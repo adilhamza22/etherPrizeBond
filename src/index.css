@@ -1,0 +1,87 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 20px; /* Add margin to body */
+    padding: 0;
+    background-color: #f8f9fa;
+  }
+  
+  .container {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  h1 {
+    text-align: center;
+    color: #333;
+  }
+  
+  label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+  }
+  
+  input[type="number"],
+  button {
+    padding: 10px;
+    margin-bottom: 20px;
+    width: calc(100% - 20px); /* Adjust width to leave space for margins */
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+  }
+  
+  button {  
+    background-color: #0b6839;
+    color: #fff;
+    cursor: pointer;
+  }
+  
+  button:hover {
+    background-color: #0431ac;
+  }
+  
+  span {
+    display: block;
+    margin-bottom: 10px;
+  }
+  
+  .winners {
+    margin-top: 30px;
+  }
+  
+  .winners h2 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: #333;
+  }
+  
+  .winners div {
+    margin-bottom: 20px;
+  }
+  
+  .winners div label {
+    font-weight: bold;
+  }
+  
+  .winners div span {
+    font-weight: normal;
+  }
+  
+  @media (max-width: 600px) {
+    .container {
+      padding: 10px;
+    }
+  
+    input[type="number"],
+    button {
+      padding: 8px;
+      font-size: 14px;
+    }
+  }
+  
